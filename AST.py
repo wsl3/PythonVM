@@ -5,7 +5,6 @@
     term := factor * factor * factor ... * factor
     factor := num | (expr) | -factor
     
-
 """
 import tokenize
 
@@ -18,6 +17,7 @@ class AddNode(object):
     def visit(self):
         leftValue = self.left.visit()
         rightValue = self.right.visit()
+        print("BINARY_ADD")
         return leftValue + rightValue
     def __str__(self):
         return f"<+, {self.left.visit()}, {self.right.visit()}>"
@@ -31,6 +31,7 @@ class SubNode(object):
     def visit(self):
         leftValue = self.left.visit()
         rightValue = self.right.visit()
+        print("BINARY_SUB")
         return leftValue - rightValue
     def __str__(self):
         return f"<-, {self.left.visit()}, {self.right.visit()}>"
@@ -45,6 +46,7 @@ class MulNode(object):
     def visit(self):
         leftValue = self.left.visit()
         rightValue = self.right.visit()
+        print("BINARY_MUL")
         return leftValue * rightValue
     def __str__(self):
         return f"<*, {self.left.visit()}, {self.right.visit()}>"
@@ -58,6 +60,7 @@ class DivNode(object):
     def visit(self):
         leftValue = self.left.visit()
         rightValue = self.right.visit()
+        print("BINARY_DIV")
         return leftValue / rightValue
     def __str__(self):
         return f"</-, {self.left.visit()}, {self.right.visit()}>"
@@ -68,6 +71,7 @@ class NumNode(object):
         self.value = value
 
     def visit(self):
+        print(f"LOAD_CONST\t{self.value}")
         return self.value
     def __str__(self):
         return f"<num, {self.visit()}>"
@@ -164,15 +168,29 @@ def factor(t):
     return value
 
 
+
+def build():
+    a = NumNode(2)
+    b = NumNode(3)
+    c = NumNode(6)
+    
+    leftValue = MulNode(a, b)
+    res = AddNode(leftValue, c)
+
+    print(res.visit())
+
+
 if __name__ == "__main__":
 
-    f = open("./source.txt")
+    # f = open("./source.txt")
 
-    t = tokenize.generate_tokens(f.readline)
+    # t = tokenize.generate_tokens(f.readline)
 
-    # 把currentToken初始化为第一个Token
-    nextToken(t)
+    # # 把currentToken初始化为第一个Token
+    # nextToken(t)
 
-    res = expr(t)
-    print(res)
-    print(res.visit())
+    # res = expr(t)
+    # print(res)
+    # print(res.visit())
+
+    build()
