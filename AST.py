@@ -3,12 +3,75 @@
 
     expr := term + term + term ... + term
     term := factor * factor * factor ... * factor
-    factor := num | -num | (expr) | -(expr)
+    factor := num | (expr) | -factor
     
 
 """
 import tokenize
 
+
+class AddNode(object):
+    def __init__(self, left, right):
+        self.left = left
+        self.right = right
+
+    def visit(self):
+        leftValue = self.left.visit()
+        rightValue = self.right.visit()
+        return leftValue + rightValue
+    def __str__(self):
+        return f"<+, {self.left.visit()}, {self.right.visit()}>"
+    __repr__ = __str__
+
+class SubNode(object):
+    def __init__(self, left, right):
+        self.left = left
+        self.right = right
+
+    def visit(self):
+        leftValue = self.left.visit()
+        rightValue = self.right.visit()
+        return leftValue - rightValue
+    def __str__(self):
+        return f"<-, {self.left.visit()}, {self.right.visit()}>"
+    __repr__ = __str__
+
+
+class MulNode(object):
+    def __init__(self, left, right):
+        self.left = left
+        self.right = right
+
+    def visit(self):
+        leftValue = self.left.visit()
+        rightValue = self.right.visit()
+        return leftValue * rightValue
+    def __str__(self):
+        return f"<*, {self.left.visit()}, {self.right.visit()}>"
+    __repr__ = __str__
+
+class DivNode(object):
+    def __init__(self, left, right):
+        self.left = left
+        self.right = right
+
+    def visit(self):
+        leftValue = self.left.visit()
+        rightValue = self.right.visit()
+        return leftValue / rightValue
+    def __str__(self):
+        return f"</-, {self.left.visit()}, {self.right.visit()}>"
+    __repr__ = __str__
+
+class NumNode(object):
+    def __init__(self, value):
+        self.value = value
+
+    def visit(self):
+        return self.value
+    def __str__(self):
+        return f"<num, {self.visit()}>"
+    __repr__ = __str__
 
 global currentToken
 
@@ -39,9 +102,9 @@ def expr(t):
         rightValue = term(t)
 
         if tokenValue == "+":
-            value = value + rightValue
+            value = AddNode(value, rightValue)
         elif tokenValue == "-":
-            value = value - rightValue
+            value = SubNode(value, rightValue)
 
         tokenType = currentToken.type
         tokenValue = currentToken.string
@@ -64,13 +127,10 @@ def term(t):
         nextToken(t)
         rightValue = factor(t)
         if tokenValue == "*":
-            value = value * rightValue
+            value = MulNode(value, rightValue)
         elif tokenValue == "/":
-            try:
-                value = value / rightValue
-            except ZeroDivisionError as e:
-                print("Error: ", e)
-                exit(0)
+            value = DivNode(value, rightValue)
+
         tokenType = currentToken.type
         tokenValue = currentToken.string
     return value
@@ -83,21 +143,15 @@ def factor(t):
     value = 0
     # number==>2
     if tokenType == 2:
-        value = int(tokenValue)
+        value = NumNode(int(tokenValue))
         print(f"当前token:\t{value}")
+        nextToken(t)
     elif tokenValue == "-":
 
         print(f"当前token:\t{tokenValue}")
         nextToken(t)
-        if currentToken.type == 2:
-            print(f"当前token:\t{currentToken.string}")
-            value = - int(currentToken.string)
-        elif currentToken.string == "(":
-            print(f"当前token:\t(")
-            nextToken(t)
-            value = - expr(t)
-            print(f"当前token:\t)")
-       
+        value = NumNode(-factor(t).visit())
+
     elif tokenValue == "(":
         print(f"当前token:\t(")
         # current token 移动到下一个
@@ -105,8 +159,8 @@ def factor(t):
         # 求 expr 的值
         value = expr(t)
         print(f"当前token:\t)")
-    # current token后移
-    nextToken(t)
+        # current token后移
+        nextToken(t)
     return value
 
 
@@ -121,3 +175,4 @@ if __name__ == "__main__":
 
     res = expr(t)
     print(res)
+    print(res.visit())
